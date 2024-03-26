@@ -1,0 +1,15 @@
+node_modules/
+.next
+.DS_Store
+.env
+.idea
+.vscode
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+.pnp.js
+.pnp.cjs
+test-ledger
+.anchor
+target

@@ -1,0 +1,14 @@
+{
+    "name": "Ubuntu",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust",
+                "bungcip.better-toml"
+            ]
+        }
+    }
+}
