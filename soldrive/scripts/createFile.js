@@ -46,13 +46,9 @@ async function main() {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payerPrivateKeyString = 'mRnBem6E8vLjKuQtEsGu7tsfjCdrjoKxLNB5dhzt4gi2fDicZcZ2zbbFUNsY4MemGQtob1C5mjRw9v5J55RpGpp';
-    const metadataAccountPrivateKeyString = '5ogN7erDZKqi4cFQ9zcMgKi3LcD3gqQ2vQWYhpgstTut1FhiFwJKQcXaH4J2NXrzjSy2hFZ8uDar7e7xykMRR3WA';
-    const ledgerAccountPrivateKeyString = '2B9DREfWGAXGk88YP1hTxgprP3wuzxS2dPL9brUiJZbR5tS2WEZJkGxt6pcsF19oYyrUTpieGGuLZPs5dnw3ajNa';
 
     const payer = Keypair.fromSecretKey(bs58.decode(payerPrivateKeyString));
-    const metadataAccount = Keypair.fromSecretKey(bs58.decode(metadataAccountPrivateKeyString));
     // Ledger account is only used for data storage and should not need to sign transactions
-    const ledgerAccount = Keypair.fromSecretKey(bs58.decode(ledgerAccountPrivateKeyString));
 
     // Skipping the account creation part for the ledger account if it's already created and funded
 
@@ -75,11 +71,10 @@ async function main() {
         keys: [
             { pubkey: mintPublicKey, isSigner: false, isWritable: true }, // mint_account
             { pubkey: tokenAccount.address, isSigner: false, isWritable: true }, // token_account
-            { pubkey: metadataAccount.publicKey, isSigner: true, isWritable: true }, // metadata_account (also the signer)
             { pubkey: mintAuthority.publicKey, isSigner: true, isWritable: false }, // mint_authority
             { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }, // token_program
             // Assuming the ledger account is correctly set up to be writable
-            { pubkey: ledgerAccount.publicKey, isSigner: false, isWritable: true }, // ledger_account
+            // { pubkey: ledgerAccount.publicKey, isSigner: false, isWritable: true }, // ledger_account
         ],
         programId: PROGRAM_ID,
         data: metadataBuffer, // Your serialized metadata
@@ -92,7 +87,7 @@ async function main() {
 
     console.log('Signing and sending transaction...');
     // Since the ledger account is not signing, it's not included in the signers array
-    await connection.sendTransaction(transaction, [payer, metadataAccount], { skipPreflight: false, preflightCommitment: "confirmed" });
+    await connection.sendTransaction(transaction, [payer], { skipPreflight: false, preflightCommitment: "confirmed" });
     console.log('Transaction confirmed');
 }
 

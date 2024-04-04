@@ -46,8 +46,8 @@ async function mintMoreTokens(mintAuthorityPrivateKeyString, mintPublicKey, reci
 
 // Example usage
 const mintAuthorityPrivateKeyString = 'mRnBem6E8vLjKuQtEsGu7tsfjCdrjoKxLNB5dhzt4gi2fDicZcZ2zbbFUNsY4MemGQtob1C5mjRw9v5J55RpGpp';
-const mintPublicKey = 'FGrZu7VXoTPW1Tqj2ykpFvccYHCBfwqUMtYPNDb4uiCw'; // Replace with your actual mint account public key
-const recipientPublicKey = '9cszqoEoZfK3SC9teDf7brCzja3FPjNgUZkwoNWfAPUu'; // Assuming this is the wallet address of the recipient
+const mintPublicKey = 'sEYW5WcYooyX7YCK79eH9w9ZthyBbCZxgpB4cm8q4NT'; // Replace with your actual mint account public key (Token Id Public key)
+const recipientPublicKey = 'Dt66zsAwUb12H21cpVqRQx44kXFRfZxT3xCs2bKsY1XZ'; // Assuming this is the wallet address of the recipient
 const amount = 1; // Amount to mint
 
 mintMoreTokens(mintAuthorityPrivateKeyString, mintPublicKey, recipientPublicKey, amount)
