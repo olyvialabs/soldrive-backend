@@ -11,7 +11,7 @@ const { Buffer } = require('buffer');
 const bs58 = require('bs58');
 
 // Program ID must match the deployed program
-const PROGRAM_ID = new PublicKey('4v3uT7y6RHLCJLSwAjWg59tJFhZG1rpa6Q9u6NsZrgUu');
+const PROGRAM_ID = new PublicKey('uxL7YQPPJgb2RFCASV9pHLdMKhiky3wanamybNd9ko8');
 
 // Matching the Rust struct with JavaScript class
 class TokenMetadata {

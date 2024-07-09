@@ -1,0 +1,23 @@
+[package]
+name = "files"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "files"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+
+[dependencies]
+solana-program = "1.17.17"
+anchor-lang = "0.26.0"
+borsh = "0.7.0"
+
