@@ -54,6 +54,9 @@ pub mod bonk_suscription {
         let token_program = &ctx.accounts.token_program;
         let authority = &ctx.accounts.from;
 
+        let mint_address = source.mint;
+
+
         msg!("Transferring tokens...");
         // Transfer tokens from taker to initializer
         let cpi_accounts = SplTransfer {
@@ -63,8 +66,8 @@ pub mod bonk_suscription {
         };
         let cpi_program = token_program.to_account_info();
 
-        msg!("Depositor: {:?} , Receiver: {:?} , Timestamp: {:?}", ctx.accounts.from.key(), ctx.accounts.to_ata.key(), ctx.accounts.clock.unix_timestamp);
-
+        msg!("Depositor: {:?} , Receiver: {:?} , Timestamp: {:?}, Token: {:?}, Amount: {:?}", 
+            ctx.accounts.from.key(),ctx.accounts.to_ata.key(), ctx.accounts.clock.unix_timestamp, mint_address, amount);
         token::transfer(
             CpiContext::new(cpi_program, cpi_accounts),
             amount,
