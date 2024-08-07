@@ -6,30 +6,29 @@ const {
     Transaction,
     TransactionInstruction,
 } = require('@solana/web3.js');
-const { serialize } = require('borsh');
+const borsh = require('borsh');
 const { Buffer } = require('buffer');
 const bs58 = require('bs58');
 
-// Program ID must match the deployed program
-const PROGRAM_ID = new PublicKey('uxL7YQPPJgb2RFCASV9pHLdMKhiky3wanamybNd9ko8');
+const PROGRAM_ID = new PublicKey('7i64BS8nZE3bx7CJypK2T4SPfvGauBDLTX1UvkWX1qo');
 
-// Matching the Rust struct with JavaScript class
 class TokenMetadata {
-    constructor({ file_id, name, weight, file_parent_id, cid, typ, from, to }) {
-        this.file_id = file_id;
-        this.name = name;
-        this.weight = BigInt(weight);
-        this.file_parent_id = file_parent_id;
-        this.cid = cid;
-        this.typ = typ;
-        this.from = from;
-        this.to = to;
+    constructor(properties) {
+        Object.assign(this, properties);
     }
 }
 
+class Assignable {
+    constructor(properties) {
+        Object.assign(this, properties);
+    }
+}
+
+class InstructionPayload extends Assignable {}
+
 const TokenMetadataSchema = new Map([
-    [TokenMetadata, {
-        kind: 'struct',
+    [TokenMetadata, { 
+        kind: 'struct', 
         fields: [
             ['file_id', 'string'],
             ['name', 'string'],
@@ -39,42 +38,63 @@ const TokenMetadataSchema = new Map([
             ['typ', 'string'],
             ['from', 'string'],
             ['to', 'string'],
-        ],
+            ['version', 'string']  // Added version field
+        ]
+    }]
+]);
+
+const InstructionPayloadSchema = new Map([
+    [InstructionPayload, {
+        kind: 'struct',
+        fields: [
+            ['variant', 'u8'],
+            ['token_metadata', TokenMetadata]
+        ]
     }],
+    ...TokenMetadataSchema
 ]);
 
 async function main() {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     // Replace these with the actual private key strings
-    const payerPrivateKeyString = 'mRnBem6E8vLjKuQtEsGu7tsfjCdrjoKxLNB5dhzt4gi2fDicZcZ2zbbFUNsY4MemGQtob1C5mjRw9v5J55RpGpp';
-    const initiatorPrivateKeyString = '4g6ic2r7v1JpoyQGEJnM9XVFK7aDiyQyhae5MJY8crxtRMes6DAwQ5CT7tRKGhf7pbwLk9xmRta2MMgw3sR62VJf';
+    const payerPrivateKeyString = '3AE8ZwU4xQGiv6r9vdYEAv5z92vT9qnHYE7gnmyb5oDZr5JH6N5b3jfGdEX3aJ6V4Qn8CLUs6CrUDYGigi9Hb1Uu';
+    const initiatorPrivateKeyString = '3AE8ZwU4xQGiv6r9vdYEAv5z92vT9qnHYE7gnmyb5oDZr5JH6N5b3jfGdEX3aJ6V4Qn8CLUs6CrUDYGigi9Hb1Uu';
 
     const payer = Keypair.fromSecretKey(bs58.decode(payerPrivateKeyString));
     const initiator = Keypair.fromSecretKey(bs58.decode(initiatorPrivateKeyString));
 
-    // Example user metadata
-    const metadata = new TokenMetadata({
-        file_id: '1',
-        name: 'Ejemplo',
-        weight: 100,
-        file_parent_id: '0',
-        cid: 'cid',
-        typ: 'file',
-        from: 'example_from',
-        to: 'example_to'
+    // Example token metadata
+    const tokenMetadata = new TokenMetadata({
+        file_id: 'ExampleFileID',
+        name: 'ExampleFileName',
+        weight: BigInt(1000), // Use BigInt for u64
+        file_parent_id: 'ExampleParentFileID',
+        cid: 'ExampleCID',
+        typ: 'ExampleType',
+        from: 'ExampleFromAddress',
+        to: 'ExampleToAddress',
+        version: 'ExampleVersion'  // Added version field
     });
 
-    // Serialize the user metadata
-    const userMetadataBuffer = Buffer.from(serialize(TokenMetadataSchema, metadata));
+    // Create the instruction payload
+    const instructionPayload = new InstructionPayload({
+        variant: 1, // 1 for TokenMetadata
+        token_metadata: tokenMetadata
+    });
 
-    // Define the instruction for sending the user metadata
+    // Serialize the instruction payload
+    const serializedData = borsh.serialize(InstructionPayloadSchema, instructionPayload);
+    const instructionBuffer = Buffer.from(serializedData);
+
+    // Define the instruction for sending the token metadata
     const customInstruction = new TransactionInstruction({
         keys: [
             { pubkey: initiator.publicKey, isSigner: true, isWritable: true },
+            // Add more keys as needed by your instruction
         ],
         programId: PROGRAM_ID,
-        data: userMetadataBuffer, // Serialized user metadata
+        data: instructionBuffer,
     });
 
     let transaction = new Transaction().add(customInstruction);
@@ -82,8 +102,22 @@ async function main() {
     transaction.feePayer = payer.publicKey;
 
     console.log('Signing and sending transaction...');
-    const signedTransaction = await connection.sendTransaction(transaction, [payer, initiator], { skipPreflight: false, preflightCommitment: "confirmed" });
-    console.log(`Transaction confirmed with signature: ${signedTransaction}`);
+    try {
+        const signature = await connection.sendTransaction(transaction, [payer, initiator], { skipPreflight: false, preflightCommitment: "confirmed" });
+        console.log('Transaction sent. Signature:', signature);
+        
+        // Wait for confirmation
+        const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+        if (confirmation.value.err) {
+            throw new Error('Transaction failed to confirm');
+        }
+        console.log('Transaction confirmed');
+    } catch (error) {
+        console.error('Error sending transaction:', error);
+        if (error.logs) {
+            console.error('Transaction logs:', error.logs);
+        }
+    }
 }
 
 main().then(() => console.log('Script finished successfully')).catch(console.error);

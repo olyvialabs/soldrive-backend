@@ -12,12 +12,20 @@ const bs58 = require('bs58');
 
 const PROGRAM_ID = new PublicKey('7i64BS8nZE3bx7CJypK2T4SPfvGauBDLTX1UvkWX1qo');
 
+// Helper function to convert string to bytes (Uint8Array)
+function stringToBytes(str) {
+    return new TextEncoder().encode(str);
+}
+
+// Updated UserMetadata class to use bytes
 class UserMetadata {
     constructor(properties) {
-        Object.assign(this, properties);
+        this.user_solana = properties.user_solana;
+        this.did_public_address = properties.did_public_address;
     }
 }
 
+// Assignable class for structuring properties
 class Assignable {
     constructor(properties) {
         Object.assign(this, properties);
@@ -26,12 +34,13 @@ class Assignable {
 
 class InstructionPayload extends Assignable {}
 
+// Updated schema to use 'vec<u8>' for bytes
 const UserMetadataSchema = new Map([
     [UserMetadata, { 
         kind: 'struct', 
         fields: [
-            ['user_solana', 'string'],
-            ['did_public_address', 'string']
+            ['user_solana', ['u8']],
+            ['did_public_address', ['u8']]
         ]
     }]
 ]);
@@ -57,10 +66,10 @@ async function main() {
     const payer = Keypair.fromSecretKey(bs58.decode(payerPrivateKeyString));
     const initiator = Keypair.fromSecretKey(bs58.decode(initiatorPrivateKeyString));
 
-    // Example user metadata
+    // Example user metadata using bytes
     const userMetadata = new UserMetadata({
-        user_solana: 'ExampleSolanaAddress',
-        did_public_address: 'ExampleDIDPublicAddress',
+        user_solana: stringToBytes('ExampleSolanaAddress'),
+        did_public_address: stringToBytes('ExampleDIDPublicAddress'),
     });
 
     // Create the instruction payload

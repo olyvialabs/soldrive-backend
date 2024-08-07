@@ -8,26 +8,25 @@ use solana_program::{
     program_error::ProgramError,
 };
 
-// Define both structs with Borsh traits for serialization
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct UserMetadata {
-    pub user_solana: String,
-    pub did_public_address: String,
+    pub user_solana: Vec<u8>,
+    pub did_public_address: Vec<u8>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct TokenMetadata {
-    pub file_id: String,
-    pub name: String,
+    pub file_id: Vec<u8>,
+    pub name: Vec<u8>,
     pub weight: u64,
-    pub file_parent_id: String,
-    pub cid: String,
-    pub typ: String,
-    pub from: String,
-    pub to: String,
+    pub file_parent_id: Vec<u8>,
+    pub cid: Vec<u8>,
+    pub typ: Vec<u8>,
+    pub from: Vec<u8>,
+    pub to: Vec<u8>,
+    pub version : Vec<u8>
 }
 
-// Define an enum to distinguish between different instruction types
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub enum InstructionType {
     UserMetadata(UserMetadata),
@@ -43,7 +42,6 @@ pub fn process_instruction(
 ) -> ProgramResult {
     msg!("Entered process_instruction");
 
-    // Deserialize the instruction type
     let instruction = InstructionType::try_from_slice(instruction_data)
         .map_err(|_| ProgramError::InvalidInstructionData)?;
 
@@ -51,20 +49,10 @@ pub fn process_instruction(
         InstructionType::UserMetadata(metadata) => {
             msg!("Processing UserMetadata");
             msg!("Deserialized metadata: {:?}", metadata);
-            msg!("User Solana Address: {}", metadata.user_solana);
-            msg!("DID Public Address: {}", metadata.did_public_address);
         },
         InstructionType::TokenMetadata(metadata) => {
             msg!("Processing TokenMetadata");
             msg!("Deserialized metadata: {:?}", metadata);
-            msg!("File ID: {}", metadata.file_id);
-            msg!("Name: {}", metadata.name);
-            msg!("Weight: {}", metadata.weight);
-            msg!("File Parent ID: {}", metadata.file_parent_id);
-            msg!("CID: {}", metadata.cid);
-            msg!("Type: {}", metadata.typ);
-            msg!("From: {}", metadata.from);
-            msg!("To: {}", metadata.to);
         },
     }
 
